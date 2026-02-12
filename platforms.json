@@ -1,0 +1,7 @@
+{
+  "tiktok": { "timeoutMs": 6500, "mode": "oembed+html" },
+  "x": { "timeoutMs": 5000, "mode": "syndication" },
+  "instagram": { "timeoutMs": 6500, "mode": "api+html" },
+  "roblox": { "timeoutMs": 7000, "mode": "api" },
+  "discord": { "timeoutMs": 3000, "mode": "unknown" }
+}
