@@ -90,7 +90,7 @@ nav .inner{display:flex;height:3.5rem;align-items:center;justify-content:space-b
 .card-icon{width:2.5rem;height:2.5rem;border-radius:0.5rem;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center}
 .card-icon svg{width:20px;height:20px;color:var(--fg)}
 .card-name{font-weight:600;color:var(--fg)}
-.card-user{font-size:0.75rem;color:var(--muted)}
+.card-user{font-size:0.78rem;color:var(--muted);margin-top:0.1rem}
 .card-bottom{margin-top:1rem;display:flex;align-items:center;justify-content:space-between}
 .badge{display:inline-flex;align-items:center;border-radius:9999px;padding:0.25rem 0.75rem;font-size:0.75rem;font-weight:600;border:1px solid}
 .badge.available{background:hsla(142,70%,45%,0.1);color:var(--green);border-color:hsla(142,70%,45%,0.3)}
@@ -102,6 +102,18 @@ nav .inner{display:flex;height:3.5rem;align-items:center;justify-content:space-b
 .card-actions a:hover{color:var(--fg)}
 .card-actions a.claim{color:var(--primary)}
 .card-actions a.claim:hover{text-decoration:underline}
+
+/* ✅ FIX: make platform name + username stack vertically */
+.card-top > div:last-child{
+  display:flex;
+  flex-direction:column;
+  gap:0.15rem;
+}
+.card-name,.card-user{
+  display:block;
+  line-height:1.1;
+}
+
 /* Skeleton */
 .skeleton{border-radius:0.375rem;background:rgba(255,255,255,0.06);animation:pulse 1.5s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
