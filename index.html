@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<link rel="manifest" href="/site.webmanifest">
-<meta name="theme-color" content="#0a0a0a">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#0a0a0a">
 
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Taken.gg — Check Username Availability</title>
+  <meta name="description" content="Instantly check if your username is available across TikTok, X, Instagram, Roblox, and Discord."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Taken.gg — Check Username Availability</title>
-<meta name="description" content="Instantly check if your username is available across TikTok, X, Instagram, Roblox, and Discord."/>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -164,230 +164,361 @@ footer .links .disabled{opacity:0.5;cursor:default}
 .tooltip-wrap:hover .tip{opacity:1}
 </style>
 </head>
+
 <body>
 <!-- NAV -->
 <nav class="topnav glass">
-<div class="container inner">
-<a href="#" class="logo">taken<span>.gg</span></a>
-<div class="nav-links">
-<button onclick="openModal('privacy')">Privacy</button>
-<button onclick="openModal('terms')">Terms</button>
-</div>
-</div>
+  <div class="container inner">
+    <a href="#" class="logo">taken<span>.gg</span></a>
+    <div class="nav-links">
+      <button onclick="openModal('privacy')">Privacy</button>
+      <button onclick="openModal('terms')">Terms</button>
+    </div>
+  </div>
 </nav>
+
 <!-- HERO -->
 <section class="hero">
-<div class="container" style="max-width:42rem">
-<h1>Check if your username is <span class="red">taken</span>.</h1>
-<p class="sub">Instantly search across TikTok, X, Instagram, Roblox, and Discord.</p>
-<div class="input-row">
-<div class="input-wrap">
-<span class="at">@</span>
-<input type="text" id="usernameInput" placeholder="username" aria-label="Username to check"/>
-</div>
-<button class="btn-check" id="checkBtn" disabled onclick="handleCheck()">Check Availability</button>
-</div>
-<p class="validation-err" id="validationErr"></p>
-<div class="trust">
-<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> No login required</span>
-<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Instant multi-platform search</span>
-<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Privacy-first</span>
-</div>
-</div>
+  <div class="container" style="max-width:42rem">
+    <h1>Check if your username is <span class="red">taken</span>.</h1>
+    <p class="sub">Instantly search across TikTok, X, Instagram, Roblox, and Discord.</p>
+
+    <div class="input-row">
+      <div class="input-wrap">
+        <span class="at">@</span>
+        <input type="text" id="usernameInput" placeholder="username" aria-label="Username to check"/>
+      </div>
+      <button class="btn-check" id="checkBtn" disabled onclick="handleCheck()">Check Availability</button>
+    </div>
+
+    <p class="validation-err" id="validationErr"></p>
+
+    <div class="trust">
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> No login required</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Instant multi-platform search</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Privacy-first</span>
+    </div>
+  </div>
 </section>
+
 <!-- PLATFORMS -->
 <section class="platforms">
-<div class="container" style="max-width:42rem">
-<div class="header">
-<span class="label">Platforms</span>
-<div class="actions">
-<button onclick="selectAll()">Select all</button>
-<span class="sep">|</span>
-<button onclick="clearAll()">Clear</button>
-</div>
-</div>
-<p class="validation-err" id="platformErr"></p>
-<div class="pill-row" id="pillRow"></div>
-</div>
+  <div class="container" style="max-width:42rem">
+    <div class="header">
+      <span class="label">Platforms</span>
+      <div class="actions">
+        <button onclick="selectAll()">Select all</button>
+        <span class="sep">|</span>
+        <button onclick="clearAll()">Clear</button>
+      </div>
+    </div>
+
+    <p class="validation-err" id="platformErr"></p>
+    <div class="pill-row" id="pillRow"></div>
+  </div>
 </section>
+
 <!-- RESULTS -->
 <section class="results">
-<div class="container" style="max-width:48rem">
-<div id="resultsArea">
-<div class="empty" id="emptyState">Enter a username above and hit check to see results.</div>
-</div>
-</div>
+  <div class="container" style="max-width:48rem">
+    <div id="resultsArea">
+      <div class="empty" id="emptyState">Enter a username above and hit check to see results.</div>
+    </div>
+  </div>
 </section>
+
 <!-- WHY -->
 <section class="why">
-<div class="container" style="max-width:48rem">
-<h2>Why use taken.gg?</h2>
-<div class="why-grid">
-<div class="why-card glass glass-hover">
-<div class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
-<h3>Fast multi-platform search</h3>
-<p>Check availability across five major platforms in a single click.</p>
-</div>
-<div class="why-card glass glass-hover">
-<div class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-<h3>Clean real-time checks</h3>
-<p>Live queries against each platform — no stale or cached data.</p>
-</div>
-<div class="why-card glass glass-hover">
-<div class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
-<h3>Built for creators</h3>
-<p>Secure your brand identity everywhere before someone else does.</p>
-</div>
-</div>
-</div>
+  <div class="container" style="max-width:48rem">
+    <h2>Why use taken.gg?</h2>
+    <div class="why-grid">
+      <div class="why-card glass glass-hover">
+        <div class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+        <h3>Fast multi-platform search</h3>
+        <p>Check availability across five major platforms in a single click.</p>
+      </div>
+
+      <div class="why-card glass glass-hover">
+        <div class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h3>Clean real-time checks</h3>
+        <p>Live queries against each platform — no stale or cached data.</p>
+      </div>
+
+      <div class="why-card glass glass-hover">
+        <div class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
+        <h3>Built for creators</h3>
+        <p>Secure your brand identity everywhere before someone else does.</p>
+      </div>
+    </div>
+  </div>
 </section>
+
 <!-- FOOTER -->
 <footer>
-<div class="container">
-<div class="inner" style="max-width:48rem;margin:0 auto">
-<span>&copy; 2026 taken.gg</span>
-<div class="links">
-<button onclick="openModal('privacy')">Privacy</button>
-<button onclick="openModal('terms')">Terms</button>
-<span class="disabled tooltip-wrap">API<span class="tip">Coming soon</span></span>
-<a href="mailto:support@taken.gg">Contact</a>
-</div>
-</div>
-</div>
+  <div class="container">
+    <div class="inner" style="max-width:48rem;margin:0 auto">
+      <span>&copy; 2026 taken.gg</span>
+      <div class="links">
+        <button onclick="openModal('privacy')">Privacy</button>
+        <button onclick="openModal('terms')">Terms</button>
+        <span class="disabled tooltip-wrap">API<span class="tip">Coming soon</span></span>
+        <a href="mailto:support@taken.gg">Contact</a>
+      </div>
+    </div>
+  </div>
 </footer>
+
 <!-- PRIVACY MODAL -->
 <div class="modal-overlay" id="privacyModal" onclick="if(event.target===this)closeModals()">
-<div class="modal" role="dialog" aria-label="Privacy Policy">
-<button class="close-btn" onclick="closeModals()" aria-label="Close">&times;</button>
-<h1>Privacy Policy</h1>
-<p class="updated">Last updated: February 12, 2026</p>
-<section><h2>What is taken.gg?</h2><p>taken.gg is a free username availability checker that lets you instantly search whether a specific username is available across multiple platforms including TikTok, X (formerly Twitter), Instagram, Roblox, and Discord.</p></section>
-<section><h2>What Data We Collect</h2><ul><li><strong>Username queries</strong> — the usernames you type into the search field.</li><li><strong>Selected platforms</strong> — which platforms you choose to check.</li><li><strong>Basic server logs</strong> — IP address and user agent, collected automatically for security and rate-limiting purposes.</li><li><strong>Optional contact info</strong> — if you sign up for future "Watch" alerts (coming soon), we may collect your email address or webhook URL.</li></ul></section>
-<section><h2>What We Do NOT Collect</h2><ul><li>We never ask for or store passwords to any third-party platform.</li><li>We do not sell, rent, or share your personal data with third parties for marketing purposes.</li></ul></section>
-<section><h2>How We Use Your Data</h2><ul><li><strong>Provide results</strong> — to query platforms and return availability status.</li><li><strong>Prevent abuse</strong> — rate limiting and bot protection to keep the service fair for everyone.</li><li><strong>Improve reliability</strong> — aggregated, anonymized analytics to monitor uptime and performance.</li></ul></section>
-<section><h2>Cookies &amp; Local Storage</h2><p>We use only essential cookies and local storage to remember your preferences such as platform selection and theme. We do not use tracking cookies or third-party advertising cookies.</p></section>
-<section><h2>Third-Party Services</h2><p>taken.gg may be hosted via services such as Cloudflare Pages or similar infrastructure providers. If analytics are used, we prioritize minimal, privacy-friendly solutions. No personally identifiable data is shared with analytics providers.</p></section>
-<section><h2>Data Retention</h2><p>Server logs are retained for a maximum of 30 days and are then automatically deleted, unless longer retention is required for security investigations or legal obligations.</p></section>
-<section><h2>Your Rights</h2><p>You may request deletion of any data we hold about you by contacting us at <a href="mailto:support@taken.gg">support@taken.gg</a>. We will respond to all valid requests within 30 days.</p></section>
-<section><h2>Children</h2><p>taken.gg is not directed to children under the age of 13. We do not knowingly collect personal information from children. If you believe a child has provided us with personal data, please contact us so we can delete it.</p></section>
-<section><h2>Changes to This Policy</h2><p>We may update this Privacy Policy from time to time. Changes will be posted on this page with an updated "Last updated" date. Your continued use of taken.gg after changes constitutes acceptance of the revised policy.</p></section>
-<section><h2>Contact</h2><p>For questions about this policy, contact us at <a href="mailto:support@taken.gg">support@taken.gg</a>.</p></section>
+  <div class="modal" role="dialog" aria-label="Privacy Policy">
+    <button class="close-btn" onclick="closeModals()" aria-label="Close">&times;</button>
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated: February 12, 2026</p>
+
+    <section><h2>What is taken.gg?</h2><p>taken.gg is a free username availability checker that lets you instantly search whether a specific username is available across multiple platforms including TikTok, X (formerly Twitter), Instagram, Roblox, and Discord.</p></section>
+    <section><h2>What Data We Collect</h2>
+      <ul>
+        <li><strong>Username queries</strong> — the usernames you type into the search field.</li>
+        <li><strong>Selected platforms</strong> — which platforms you choose to check.</li>
+        <li><strong>Basic server logs</strong> — IP address and user agent, collected automatically for security and rate-limiting purposes.</li>
+        <li><strong>Optional contact info</strong> — if you sign up for future "Watch" alerts (coming soon), we may collect your email address or webhook URL.</li>
+      </ul>
+    </section>
+    <section><h2>What We Do NOT Collect</h2>
+      <ul>
+        <li>We never ask for or store passwords to any third-party platform.</li>
+        <li>We do not sell, rent, or share your personal data with third parties for marketing purposes.</li>
+      </ul>
+    </section>
+    <section><h2>How We Use Your Data</h2>
+      <ul>
+        <li><strong>Provide results</strong> — to query platforms and return availability status.</li>
+        <li><strong>Prevent abuse</strong> — rate limiting and bot protection to keep the service fair for everyone.</li>
+        <li><strong>Improve reliability</strong> — aggregated, anonymized analytics to monitor uptime and performance.</li>
+      </ul>
+    </section>
+    <section><h2>Cookies &amp; Local Storage</h2><p>We use only essential cookies and local storage to remember your preferences such as platform selection and theme. We do not use tracking cookies or third-party advertising cookies.</p></section>
+    <section><h2>Third-Party Services</h2><p>taken.gg may be hosted via services such as Cloudflare Pages or similar infrastructure providers. If analytics are used, we prioritize minimal, privacy-friendly solutions. No personally identifiable data is shared with analytics providers.</p></section>
+    <section><h2>Data Retention</h2><p>Server logs are retained for a maximum of 30 days and are then automatically deleted, unless longer retention is required for security investigations or legal obligations.</p></section>
+    <section><h2>Your Rights</h2><p>You may request deletion of any data we hold about you by contacting us at <a href="mailto:support@taken.gg">support@taken.gg</a>. We will respond to all valid requests within 30 days.</p></section>
+    <section><h2>Children</h2><p>taken.gg is not directed to children under the age of 13. We do not knowingly collect personal information from children. If you believe a child has provided us with personal data, please contact us so we can delete it.</p></section>
+    <section><h2>Changes to This Policy</h2><p>We may update this Privacy Policy from time to time. Changes will be posted on this page with an updated "Last updated" date. Your continued use of taken.gg after changes constitutes acceptance of the revised policy.</p></section>
+    <section><h2>Contact</h2><p>For questions about this policy, contact us at <a href="mailto:support@taken.gg">support@taken.gg</a>.</p></section>
+  </div>
 </div>
-</div>
+
 <!-- TERMS MODAL -->
 <div class="modal-overlay" id="termsModal" onclick="if(event.target===this)closeModals()">
-<div class="modal" role="dialog" aria-label="Terms of Service">
-<button class="close-btn" onclick="closeModals()" aria-label="Close">&times;</button>
-<h1>Terms of Service</h1>
-<p class="updated">Last updated: February 12, 2026</p>
-<section><h2>Acceptance of Terms</h2><p>By accessing or using taken.gg, you agree to be bound by these Terms of Service. If you do not agree with any part of these terms, you may not use the service.</p></section>
-<section><h2>Service Description</h2><p>taken.gg is a username availability checking tool. It queries public platform APIs and pages to determine whether a given username appears to be registered. Results are informational only and do not guarantee actual availability or ownership status on any platform.</p></section>
-<section><h2>Accuracy Disclaimer</h2><ul><li>Results may be inaccurate due to platform API changes, rate limits, regional blocks, or cached data.</li><li>A status of "Unknown" means we were unable to verify availability at the time of the check.</li><li>A status of "Available" does not guarantee you will be able to register the username, as platforms may have additional restrictions.</li></ul></section>
-<section><h2>User Responsibilities</h2><ul><li>Use the service in good faith and for lawful purposes only.</li><li>Do not abuse, scrape, or overload the service with automated requests.</li><li>Do not use taken.gg to facilitate harassment, impersonation, cybersquatting, or any illegal activity.</li></ul></section>
-<section><h2>Prohibited Use</h2><ul><li>Automated high-volume requests without explicit written permission from taken.gg.</li><li>Attempts to bypass security measures, rate limits, or access controls.</li><li>Reverse-engineering, decompiling, or otherwise attempting to extract the source code of the service.</li><li>Using the service in any manner that could damage, disable, or impair its operation.</li></ul></section>
-<section><h2>Intellectual Property</h2><p>The taken.gg name, logo, branding, and all associated visual assets are the intellectual property of taken.gg. You may not use our branding without prior written consent. Platform icons and names belong to their respective owners.</p></section>
-<section><h2>Service Availability</h2><p>taken.gg is provided on an "as is" and "as available" basis. We do not guarantee uninterrupted or error-free service. We reserve the right to modify, suspend, or discontinue the service at any time without notice.</p></section>
-<section><h2>Limitation of Liability</h2><p>To the maximum extent permitted by law, taken.gg and its operators shall not be liable for any direct, indirect, incidental, consequential, or special damages arising from your use of the service, including but not limited to losses caused by inaccurate results, missed username registrations, or service downtime.</p></section>
-<section><h2>Termination</h2><p>We reserve the right to block or restrict access for users who violate these terms or engage in abusive behavior, without prior notice or liability.</p></section>
-<section><h2>Governing Law</h2><p>These terms shall be governed by and construed in accordance with the laws of the United States. Any disputes arising from these terms will be resolved in the courts of the United States.</p></section>
-<section><h2>Contact</h2><p>For questions about these terms, contact us at <a href="mailto:support@taken.gg">support@taken.gg</a>.</p></section>
+  <div class="modal" role="dialog" aria-label="Terms of Service">
+    <button class="close-btn" onclick="closeModals()" aria-label="Close">&times;</button>
+    <h1>Terms of Service</h1>
+    <p class="updated">Last updated: February 12, 2026</p>
+
+    <section><h2>Acceptance of Terms</h2><p>By accessing or using taken.gg, you agree to be bound by these Terms of Service. If you do not agree with any part of these terms, you may not use the service.</p></section>
+    <section><h2>Service Description</h2><p>taken.gg is a username availability checking tool. It queries public platform APIs and pages to determine whether a given username appears to be registered. Results are informational only and do not guarantee actual availability or ownership status on any platform.</p></section>
+    <section><h2>Accuracy Disclaimer</h2>
+      <ul>
+        <li>Results may be inaccurate due to platform API changes, rate limits, regional blocks, or cached data.</li>
+        <li>A status of "Unknown" means we were unable to verify availability at the time of the check.</li>
+        <li>A status of "Available" does not guarantee you will be able to register the username, as platforms may have additional restrictions.</li>
+      </ul>
+    </section>
+    <section><h2>User Responsibilities</h2>
+      <ul>
+        <li>Use the service in good faith and for lawful purposes only.</li>
+        <li>Do not abuse, scrape, or overload the service with automated requests.</li>
+        <li>Do not use taken.gg to facilitate harassment, impersonation, cybersquatting, or any illegal activity.</li>
+      </ul>
+    </section>
+    <section><h2>Prohibited Use</h2>
+      <ul>
+        <li>Automated high-volume requests without explicit written permission from taken.gg.</li>
+        <li>Attempts to bypass security measures, rate limits, or access controls.</li>
+        <li>Reverse-engineering, decompiling, or otherwise attempting to extract the source code of the service.</li>
+        <li>Using the service in any manner that could damage, disable, or impair its operation.</li>
+      </ul>
+    </section>
+    <section><h2>Intellectual Property</h2><p>The taken.gg name, logo, branding, and all associated visual assets are the intellectual property of taken.gg. You may not use our branding without prior written consent. Platform icons and names belong to their respective owners.</p></section>
+    <section><h2>Service Availability</h2><p>taken.gg is provided on an "as is" and "as available" basis. We do not guarantee uninterrupted or error-free service. We reserve the right to modify, suspend, or discontinue the service at any time without notice.</p></section>
+    <section><h2>Limitation of Liability</h2><p>To the maximum extent permitted by law, taken.gg and its operators shall not be liable for any direct, indirect, incidental, consequential, or special damages arising from your use of the service, including but not limited to losses caused by inaccurate results, missed username registrations, or service downtime.</p></section>
+    <section><h2>Termination</h2><p>We reserve the right to block or restrict access for users who violate these terms or engage in abusive behavior, without prior notice or liability.</p></section>
+    <section><h2>Governing Law</h2><p>These terms shall be governed by and construed in accordance with the laws of the United States. Any disputes arising from these terms will be resolved in the courts of the United States.</p></section>
+    <section><h2>Contact</h2><p>For questions about these terms, contact us at <a href="mailto:support@taken.gg">support@taken.gg</a>.</p></section>
+  </div>
 </div>
-</div>
+
 <script>
 const PLATFORMS=[
-{id:"tiktok",label:"TikTok",rules:"2–24 chars, letters, numbers, underscores, periods",signup:"https://www.tiktok.com/signup",
-icon:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9a6.33 6.33 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.3a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.75a8.18 8.18 0 0 0 4.76 1.52V6.83a4.84 4.84 0 0 1-1-.14z"/></svg>'},
-{id:"x",label:"X",rules:"4–15 chars, letters, numbers, underscores only",signup:"https://x.com/i/flow/signup",
-icon:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>'},
-{id:"instagram",label:"Instagram",rules:"1–30 chars, letters, numbers, underscores, periods",signup:"https://www.instagram.com/accounts/emailsignup/",
-icon:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>'},
-{id:"roblox",label:"Roblox",rules:"3–20 chars, letters, numbers, underscores",signup:"https://www.roblox.com/",
-icon:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M5.164 0L0 18.627l18.836 5.373L24 5.373zM10.39 14.06l-4.056-1.155 1.164-4.089 4.056 1.155z"/></svg>'},
-{id:"discord",label:"Discord",rules:"2–32 chars, most characters allowed, no consecutive periods",signup:"https://discord.com/register",
-icon:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>'}
+  {id:"tiktok",label:"TikTok",rules:"2–24 chars, letters, numbers, underscores, periods",signup:"https://www.tiktok.com/signup",
+    icon:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9a6.33 6.33 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.3a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.75a8.18 8.18 0 0 0 4.76 1.52V6.83a4.84 4.84 0 0 1-1-.14z"/></svg>'},
+  {id:"x",label:"X",rules:"4–15 chars, letters, numbers, underscores only",signup:"https://x.com/i/flow/signup",
+    icon:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>'},
+  {id:"instagram",label:"Instagram",rules:"1–30 chars, letters, numbers, underscores, periods",signup:"https://www.instagram.com/accounts/emailsignup/",
+    icon:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>'},
+  {id:"roblox",label:"Roblox",rules:"3–20 chars, letters, numbers, underscores",signup:"https://www.roblox.com/",
+    icon:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M5.164 0L0 18.627l18.836 5.373L24 5.373zM10.39 14.06l-4.056-1.155 1.164-4.089 4.056 1.155z"/></svg>'},
+  {id:"discord",label:"Discord",rules:"2–32 chars, most characters allowed, no consecutive periods",signup:"https://discord.com/register",
+    icon:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.791 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>'}
 ];
+
 const REGEX=/^[a-zA-Z0-9._]{1,32}$/;
 let selected=new Set(PLATFORMS.map(p=>p.id));
 let loading=false;
+
 const input=document.getElementById("usernameInput");
 const btn=document.getElementById("checkBtn");
 const errEl=document.getElementById("validationErr");
 const platErr=document.getElementById("platformErr");
 const resultsArea=document.getElementById("resultsArea");
+
 function renderPills(){
-const row=document.getElementById("pillRow");
-row.innerHTML=PLATFORMS.map(p=>{
-const active=selected.has(p.id);
-return`<button class="pill glass ${active?"active glow-primary-sm":"glass-hover"}" ${loading?"disabled":""} onclick="togglePlatform('${p.id}')" aria-pressed="${active}">
-<span style="display:inline-flex;width:16px;height:16px">${p.icon}</span>${p.label}</button>`;
-}).join("");
+  const row=document.getElementById("pillRow");
+  row.innerHTML=PLATFORMS.map(p=>{
+    const active=selected.has(p.id);
+    return `<button class="pill glass ${active?"active glow-primary-sm":"glass-hover"}" ${loading?"disabled":""} onclick="togglePlatform('${p.id}')" aria-pressed="${active}">
+      <span style="display:inline-flex;width:16px;height:16px">${p.icon}</span>${p.label}
+    </button>`;
+  }).join("");
 }
-function togglePlatform(id){if(loading)return;selected.has(id)?selected.delete(id):selected.add(id);renderPills();updateBtn()}
-function selectAll(){if(loading)return;PLATFORMS.forEach(p=>selected.add(p.id));renderPills();updateBtn()}
-function clearAll(){if(loading)return;selected.clear();renderPills();updateBtn()}
+
+function togglePlatform(id){ if(loading) return; selected.has(id)?selected.delete(id):selected.add(id); renderPills(); updateBtn(); }
+function selectAll(){ if(loading) return; PLATFORMS.forEach(p=>selected.add(p.id)); renderPills(); updateBtn(); }
+function clearAll(){ if(loading) return; selected.clear(); renderPills(); updateBtn(); }
+
 function validate(){
-const v=input.value.trim();
-if(!v)return"Username is required.";
-if(v.length<2)return"Username must be at least 2 characters.";
-if(v.length>32)return"Username must be 32 characters or fewer.";
-if(!REGEX.test(v))return"Only letters, numbers, underscores, and periods allowed.";
-return null;
+  const v=input.value.trim();
+  if(!v) return "Username is required.";
+  if(v.length<2) return "Username must be at least 2 characters.";
+  if(v.length>32) return "Username must be 32 characters or fewer.";
+  if(!REGEX.test(v)) return "Only letters, numbers, underscores, and periods allowed.";
+  return null;
 }
+
 function updateBtn(){
-const err=validate();
-btn.disabled=!!err||selected.size===0||loading;
+  const err=validate();
+  btn.disabled = !!err || selected.size===0 || loading;
 }
+
 input.addEventListener("input",()=>{
-const err=validate();
-errEl.textContent=input.value.trim()?err||"":"";
-input.classList.toggle("invalid",!!err&&!!input.value.trim());
-platErr.textContent="";
-updateBtn();
+  const err=validate();
+  errEl.textContent = input.value.trim() ? (err || "") : "";
+  input.classList.toggle("invalid", !!err && !!input.value.trim());
+  platErr.textContent="";
+  updateBtn();
 });
-input.addEventListener("keydown",e=>{if(e.key==="Enter"&&!btn.disabled)handleCheck()});
+input.addEventListener("keydown",e=>{ if(e.key==="Enter" && !btn.disabled) handleCheck(); });
+
 async function handleCheck(){
-const err=validate();
-if(err){errEl.textContent=err;return}
-if(selected.size===0){platErr.textContent="Select at least one platform.";return}
-const username=input.value.trim();
-loading=true;updateBtn();renderPills();
-btn.innerHTML='<span class="spinner"></span>Checking…';
-// Skeleton
-const ids=Array.from(selected);
-resultsArea.innerHTML=`<div class="results-grid">${ids.map(()=>`<div class="glass" style="border-radius:var(--radius);padding:1.25rem"><div style="display:flex;gap:0.75rem;align-items:center"><div class="skeleton" style="width:2.5rem;height:2.5rem;border-radius:0.5rem"></div><div><div class="skeleton" style="width:5rem;height:1rem;margin-bottom:0.5rem"></div><div class="skeleton" style="width:4rem;height:0.75rem"></div></div></div><div class="skeleton" style="width:6rem;height:1.75rem;border-radius:9999px;margin-top:1rem"></div></div>`).join("")}</div>`;
-let results;
-try{
-const res=await fetch("/api/check",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username,platforms:ids})});
-if(!res.ok)throw new Error();
-const data=await res.json();
-results=data.results;
-}catch{
-results=ids.map(p=>({platform:p,status:["available","taken","unknown"][Math.floor(Math.random()*3)],url:`https://${p}.com/${username}`}));
+  const err = validate();
+  if(err){ errEl.textContent = err; return; }
+  if(selected.size===0){ platErr.textContent="Select at least one platform."; return; }
+
+  const username = input.value.trim();
+  const ids = Array.from(selected);
+
+  loading = true;
+  updateBtn();
+  renderPills();
+  btn.innerHTML = '<span class="spinner"></span>Checking…';
+
+  // Skeleton
+  resultsArea.innerHTML = `
+    <div class="results-grid">
+      ${ids.map(()=>`
+        <div class="glass" style="border-radius:var(--radius);padding:1.25rem">
+          <div style="display:flex;gap:0.75rem;align-items:center">
+            <div class="skeleton" style="width:2.5rem;height:2.5rem;border-radius:0.5rem"></div>
+            <div>
+              <div class="skeleton" style="width:5rem;height:1rem;margin-bottom:0.5rem"></div>
+              <div class="skeleton" style="width:4rem;height:0.75rem"></div>
+            </div>
+          </div>
+          <div class="skeleton" style="width:6rem;height:1.75rem;border-radius:9999px;margin-top:1rem"></div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+
+  let results;
+
+  try {
+    const res = await fetch("/api/check", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, platforms: ids })
+    });
+
+    if (!res.ok) throw new Error("API error");
+
+    const data = await res.json();
+
+    if (!data.results || !Array.isArray(data.results)) {
+      throw new Error("Invalid response structure");
+    }
+
+    results = data.results;
+
+  } catch (err) {
+    console.error("API failed:", err);
+
+    resultsArea.innerHTML = `
+      <div class="empty" style="color: var(--red);">
+        Something went wrong while checking availability.<br>
+        Please try again in a few seconds.
+      </div>
+    `;
+
+    loading = false;
+    updateBtn();
+    renderPills();
+    btn.textContent = "Check Availability";
+    return;
+  }
+
+  loading = false;
+  updateBtn();
+  renderPills();
+  btn.textContent = "Check Availability";
+
+  renderResults(results, username);
 }
-loading=false;updateBtn();renderPills();
-btn.textContent="Check Availability";
-renderResults(results,username);
-}
+
 function renderResults(results,username){
-const html=results.map((r,i)=>{
-const p=PLATFORMS.find(x=>x.id===r.platform);
-const statusLabel={available:"Available",taken:"Taken",unknown:"Unknown"}[r.status];
-const badgeClass=r.status;
-let actions="";
-if(r.status==="taken"&&r.url)actions+=`<a href="${r.url}" target="_blank" rel="noopener noreferrer">View profile →</a>`;
-if(r.status==="available")actions+=`<a href="${p.signup}" target="_blank" rel="noopener noreferrer" class="claim">Claim now →</a>`;
-return`<div class="result-card glass glass-hover" style="animation-delay:${i*80}ms">
-<div class="card-top"><div class="card-icon">${p.icon}</div><div><span class="card-name">${p.label}</span><span class="card-user">@${username}</span></div></div>
-<div class="card-bottom"><span class="badge ${badgeClass}">${statusLabel}</span><span class="card-time">Checked just now</span></div>
-<div class="card-actions">${actions}</div>
-</div>`;
-}).join("");
-resultsArea.innerHTML=`<div class="results-grid">${html}</div>`;
+  const html=results.map((r,i)=>{
+    const p=PLATFORMS.find(x=>x.id===r.platform);
+    const statusLabel={available:"Available",taken:"Taken",unknown:"Unknown"}[r.status] || "Unknown";
+    const badgeClass=r.status || "unknown";
+
+    let actions="";
+    if(r.status==="taken" && r.url) actions += `<a href="${r.url}" target="_blank" rel="noopener noreferrer">View profile →</a>`;
+    if(r.status==="available") actions += `<a href="${p.signup}" target="_blank" rel="noopener noreferrer" class="claim">Claim now →</a>`;
+
+    return `<div class="result-card glass glass-hover" style="animation-delay:${i*80}ms">
+      <div class="card-top">
+        <div class="card-icon">${p.icon}</div>
+        <div>
+          <span class="card-name">${p.label}</span>
+          <span class="card-user">@${username}</span>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <span class="badge ${badgeClass}">${statusLabel}</span>
+        <span class="card-time">Checked just now</span>
+      </div>
+      <div class="card-actions">${actions}</div>
+    </div>`;
+  }).join("");
+
+  resultsArea.innerHTML = `<div class="results-grid">${html}</div>`;
 }
-function openModal(id){document.getElementById(id+"Modal").classList.add("open")}
-function closeModals(){document.querySelectorAll(".modal-overlay").forEach(m=>m.classList.remove("open"))}
-document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModals()});
-renderPills();updateBtn();
+
+function openModal(id){ document.getElementById(id+"Modal").classList.add("open"); }
+function closeModals(){ document.querySelectorAll(".modal-overlay").forEach(m=>m.classList.remove("open")); }
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeModals(); });
+
+renderPills();
+updateBtn();
 </script>
+
 </body>
 </html>
