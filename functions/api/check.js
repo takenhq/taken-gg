@@ -6,33 +6,12 @@ export async function onRequestPost({ request, env }) {
 
     if (!username) return json({ error: "Username is required" }, 400);
     if (username.length < 2 || username.length > 32) return json({ error: "Username must be 2–32 chars" }, 400);
-    if (!/^[a-zA-Z0-9._]{1,32}$/.test(username)) return json({ error: "Invalid username characters" }, 400);
-    if (platforms.length === 0) return json({ error: "Select at least one platform" }, 400);
+    if (!/^[a-zA-Z0-9._]{1,32}$/.test(username)) return json({ error: "Invalid username format" }, 400);
+    if (!platforms.length) return json({ error: "Select at least one platform" }, 400);
 
-    const uniquePlatforms = [...new Set(platforms)].slice(0, 10);
-
-    const results = await Promise.all(
-      uniquePlatforms.map(async (p) => {
-        switch (p) {
-          case "x":
-            return await checkX(username);
-          case "instagram":
-            return await checkInstagram(username);
-          case "tiktok":
-            return await checkTikTok(username);
-          case "roblox":
-            return await checkRoblox(username);
-          case "discord":
-            // No reliable public availability check for Discord usernames.
-            return { platform: "discord", status: "unknown", reason: "unsupported" };
-          default:
-            return { platform: p, status: "unknown" };
-        }
-      })
-    );
-
+    const results = await Promise.all(platforms.map((p) => checkPlatform(p, username, env)));
     return json({ results });
-  } catch {
+  } catch (e) {
     return json({ error: "Bad request" }, 400);
   }
 }
@@ -47,178 +26,259 @@ function json(obj, status = 200) {
   });
 }
 
-async function fetchWithTimeout(url, init = {}, ms = 8000) {
-  const controller = new AbortController();
-  const t = setTimeout(() => controller.abort(), ms);
-  try {
-    const res = await fetch(url, { ...init, signal: controller.signal });
-    return res;
-  } finally {
-    clearTimeout(t);
+/**
+ * Fetch helper with:
+ * - timeout (Workers-friendly)
+ * - basic headers that reduce bot “weird responses”
+ * - optional redirect control
+ */
+async function smartFetch(url, opts = {}) {
+  const timeoutMs = opts.timeoutMs ?? 7000;
+
+  const headers = new Headers(opts.headers || {});
+  if (!headers.has("User-Agent")) headers.set("User-Agent", "Mozilla/5.0 (compatible; taken.gg/1.0; +https://taken.gg)");
+  if (!headers.has("Accept")) headers.set("Accept", "text/html,application/json;q=0.9,*/*;q=0.8");
+  if (!headers.has("Accept-Language")) headers.set("Accept-Language", "en-US,en;q=0.9");
+
+  const init = {
+    method: opts.method || "GET",
+    headers,
+    redirect: opts.redirect || "follow",
+    body: opts.body,
+    signal: AbortSignal.timeout(timeoutMs),
+  };
+
+  return fetch(url, init);
+}
+
+async function checkPlatform(platform, username, env) {
+  switch (platform) {
+    case "x":
+      return checkX(username);
+
+    case "tiktok":
+      return checkTikTok(username);
+
+    case "instagram":
+      return checkInstagram(username);
+
+    case "roblox":
+      return checkRoblox(username);
+
+    case "discord":
+      // No public reliable username existence check without OAuth/bot presence.
+      return { platform: "discord", status: "unknown" };
+
+    default:
+      return { platform, status: "unknown" };
   }
 }
 
-/**
- * X (Twitter) — best no-login check:
- * Returns [] if not found, or an object with id/name if found.
- */
+/* -------------------------
+   X (Twitter) — best method
+   -------------------------
+   Uses public syndication endpoint:
+   - If user exists → returns array with objects
+   - If not → returns []
+*/
 async function checkX(username) {
-  const screen = username.replace(/^@/, "");
-  const url = `https://cdn.syndication.twimg.com/widgets/followbutton/info.json?screen_names=${encodeURIComponent(screen)}`;
+  const url = `https://cdn.syndication.twimg.com/widgets/followbutton/info.json?screen_names=${encodeURIComponent(username)}`;
 
   try {
-    const res = await fetchWithTimeout(url, {
-      headers: {
-        "Accept": "application/json",
-        "User-Agent": "taken.gg (+https://taken.gg)",
-      },
+    const res = await smartFetch(url, {
+      headers: { Accept: "application/json" },
+      redirect: "follow",
+      timeoutMs: 6000,
     });
 
-    if (!res.ok) return { platform: "x", status: "unknown" };
+    if (res.status === 200) {
+      const data = await res.json().catch(() => null);
+      const exists = Array.isArray(data) && data.length > 0 && data[0]?.screen_name;
+      if (exists) return { platform: "x", status: "taken", url: `https://x.com/${username}` };
+      return { platform: "x", status: "available" };
+    }
 
-    const data = await res.json().catch(() => null);
-    const found = Array.isArray(data) && data.length > 0;
-
-    return found
-      ? { platform: "x", status: "taken", url: `https://x.com/${screen}` }
-      : { platform: "x", status: "available" };
+    // rate-limited / blocked
+    if (res.status === 429 || res.status === 403) return { platform: "x", status: "unknown" };
+    return { platform: "x", status: "unknown" };
   } catch {
     return { platform: "x", status: "unknown" };
   }
 }
 
-/**
- * Instagram — try a JSON endpoint first, then fallback to HTML phrase detection.
- */
-async function checkInstagram(username) {
-  const u = username.replace(/^@/, "");
-  const profileUrl = `https://www.instagram.com/${u}/`;
+/* -------------------------
+   TikTok — oEmbed first
+   -------------------------
+   TikTok profile pages are very unreliable via server-side fetch.
+   The oEmbed endpoint tends to be much more consistent.
+*/
+async function checkTikTok(username) {
+  const profileUrl = `https://www.tiktok.com/@${username}`;
+  const oembedUrl = `https://www.tiktok.com/oembed?url=${encodeURIComponent(profileUrl)}`;
 
-  // Attempt JSON-ish endpoint (often works, sometimes blocked)
-  const jsonUrl = `https://www.instagram.com/${u}/?__a=1&__d=dis`;
-
+  // 1) Try oEmbed
   try {
-    const res = await fetchWithTimeout(jsonUrl, {
-      headers: {
-        "Accept": "application/json,text/plain,*/*",
-        "User-Agent": "taken.gg (+https://taken.gg)",
-      },
+    const res = await smartFetch(oembedUrl, {
+      headers: { Accept: "application/json" },
       redirect: "follow",
-    }, 8000);
+      timeoutMs: 6500,
+    });
 
-    const ct = (res.headers.get("content-type") || "").toLowerCase();
-
-    // If we actually got JSON, it’s a strong “taken”
-    if (res.ok && ct.includes("application/json")) {
-      return { platform: "instagram", status: "taken", url: profileUrl };
+    if (res.status === 200) {
+      const data = await res.json().catch(() => null);
+      // If oEmbed returns author_name / title, it almost always means it exists.
+      if (data && (data.author_name || data.title || data.html)) {
+        return { platform: "tiktok", status: "taken", url: profileUrl };
+      }
+      // If it returns something weird but 200, treat as unknown
+      return { platform: "tiktok", status: "unknown" };
     }
 
-    // If IG blocks and returns HTML/login, fall back to HTML check below
+    // Common: 404/400 when profile/user not found
+    if (res.status === 404 || res.status === 400) {
+      return { platform: "tiktok", status: "available" };
+    }
+
+    if (res.status === 429 || res.status === 403) return { platform: "tiktok", status: "unknown" };
   } catch {
-    // fall through
+    // continue to fallback
   }
 
-  // HTML fallback: detect “page isn't available”
+  // 2) Fallback: fetch HTML and search for “not found” signals
   try {
-    const res2 = await fetchWithTimeout(profileUrl, {
+    const res = await smartFetch(profileUrl, { redirect: "follow", timeoutMs: 7500 });
+
+    if (res.status === 404) return { platform: "tiktok", status: "available" };
+    if (res.status === 403 || res.status === 429) return { platform: "tiktok", status: "unknown" };
+
+    const text = await res.text().catch(() => "");
+    const lower = text.toLowerCase();
+
+    // Keywords TikTok shows on missing profiles (varies by region/ui)
+    const notFoundSignals = [
+      "couldn't find this account",
+      "could not find this account",
+      "this account doesn't exist",
+      "this account is private",
+      "page not available",
+      "isn't available",
+    ];
+
+    // If it clearly says "couldn't find", mark available
+    if (notFoundSignals.some((s) => lower.includes(s))) {
+      return { platform: "tiktok", status: "available" };
+    }
+
+    // If HTML is tiny / looks like a bot wall, mark unknown
+    if (text.length < 1200) return { platform: "tiktok", status: "unknown" };
+
+    // Otherwise likely exists (or at least not a clear “not found”)
+    return { platform: "tiktok", status: "taken", url: profileUrl };
+  } catch {
+    return { platform: "tiktok", status: "unknown" };
+  }
+}
+
+/* -------------------------
+   Instagram — API attempt first
+   -------------------------
+   This endpoint sometimes works without cookies (not guaranteed):
+   https://www.instagram.com/api/v1/users/web_profile_info/?username=
+*/
+async function checkInstagram(username) {
+  const profileUrl = `https://www.instagram.com/${username}/`;
+  const apiUrl = `https://www.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`;
+
+  // 1) Try JSON endpoint
+  try {
+    const res = await smartFetch(apiUrl, {
       headers: {
-        "Accept": "text/html,application/xhtml+xml",
-        "User-Agent": "taken.gg (+https://taken.gg)",
-        "Accept-Language": "en-US,en;q=0.9",
+        Accept: "application/json",
+        "X-IG-App-ID": "936619743392459", // common web app id (doesn’t guarantee access, but helps sometimes)
       },
       redirect: "follow",
-    }, 8000);
+      timeoutMs: 6500,
+    });
 
-    if (res2.status === 404) return { platform: "instagram", status: "available" };
-    if (!res2.ok) return { platform: "instagram", status: "unknown" };
+    // If it works:
+    if (res.status === 200) {
+      const data = await res.json().catch(() => null);
+      const user = data?.data?.user;
+      if (user && user.username) return { platform: "instagram", status: "taken", url: profileUrl };
+      // If structure differs, fallback to HTML
+    }
 
-    const html = await res2.text();
+    // Some cases return 404 when not found
+    if (res.status === 404) return { platform: "instagram", status: "available" };
 
-    // Common IG non-existent page text:
-    if (html.includes("Sorry, this page isn't available") || html.includes("Page Not Found")) {
+    // Blocked / challenge / rate limit
+    if (res.status === 401 || res.status === 403 || res.status === 429) {
+      // fallback to HTML check
+    }
+  } catch {
+    // continue to fallback
+  }
+
+  // 2) Fallback: fetch profile HTML and look for “not available”
+  try {
+    const res = await smartFetch(profileUrl, { redirect: "follow", timeoutMs: 7500 });
+
+    if (res.status === 404) return { platform: "instagram", status: "available" };
+    if (res.status === 403 || res.status === 429) return { platform: "instagram", status: "unknown" };
+
+    const text = await res.text().catch(() => "");
+    const lower = text.toLowerCase();
+
+    // Instagram “missing profile” UI usually contains this text:
+    const notFoundSignals = [
+      "sorry, this page isn't available",
+      "the link you followed may be broken",
+      "page isn't available",
+      "page not found",
+    ];
+
+    if (notFoundSignals.some((s) => lower.includes(s))) {
       return { platform: "instagram", status: "available" };
     }
 
-    // If we got a login wall/captcha, don’t guess
-    if (html.toLowerCase().includes("login") || html.toLowerCase().includes("challenge")) {
+    // If it’s just a login wall, we can’t be 100% sure:
+    // treat as unknown rather than lying.
+    const looksLikeLoginWall =
+      lower.includes("log in") && (lower.includes("sign up") || lower.includes("instagram"));
+
+    if (looksLikeLoginWall && text.length < 50000) {
       return { platform: "instagram", status: "unknown" };
     }
 
-    // Otherwise treat as taken
+    // Otherwise likely exists
     return { platform: "instagram", status: "taken", url: profileUrl };
   } catch {
     return { platform: "instagram", status: "unknown" };
   }
 }
 
-/**
- * TikTok — HTML often returns 200 even when not found.
- * Detect “Couldn't find this account” or “couldn't find” etc.
- */
-async function checkTikTok(username) {
-  const u = username.replace(/^@/, "");
-  const url = `https://www.tiktok.com/@${u}`;
-
-  try {
-    const res = await fetchWithTimeout(url, {
-      headers: {
-        "Accept": "text/html,application/xhtml+xml",
-        "User-Agent": "taken.gg (+https://taken.gg)",
-        "Accept-Language": "en-US,en;q=0.9",
-      },
-      redirect: "follow",
-    }, 8000);
-
-    // Hard 404 is definitely available
-    if (res.status === 404) return { platform: "tiktok", status: "available" };
-    if (!res.ok) {
-      // 403/429/etc = unknown (bot wall)
-      return { platform: "tiktok", status: "unknown" };
-    }
-
-    const html = await res.text();
-
-    // Non-existent account message (seen in your screenshot)
-    const lower = html.toLowerCase();
-    if (lower.includes("couldn't find this account") || lower.includes("could not find this account")) {
-      return { platform: "tiktok", status: "available" };
-    }
-
-    // Bot wall / captcha signals
-    if (lower.includes("verify to continue") || lower.includes("captcha") || lower.includes("access denied")) {
-      return { platform: "tiktok", status: "unknown" };
-    }
-
-    return { platform: "tiktok", status: "taken", url };
-  } catch {
-    return { platform: "tiktok", status: "unknown" };
-  }
-}
-
-/**
- * Roblox — your approach is correct: username -> id lookup.
- */
+/* -------------------------
+   Roblox — best approach (your method)
+   ------------------------- */
 async function checkRoblox(username) {
   try {
-    const res = await fetchWithTimeout("https://users.roblox.com/v1/usernames/users", {
+    const res = await smartFetch("https://users.roblox.com/v1/usernames/users", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "User-Agent": "taken.gg (+https://taken.gg)",
-      },
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({ usernames: [username], excludeBannedUsers: false }),
-    }, 8000);
+      timeoutMs: 7000,
+    });
 
-    if (!res.ok) return { platform: "roblox", status: "unknown" };
+    if (!res.ok) {
+      if (res.status === 429 || res.status === 403) return { platform: "roblox", status: "unknown" };
+      return { platform: "roblox", status: "unknown" };
+    }
 
     const data = await res.json().catch(() => null);
     const found = Array.isArray(data?.data) && data.data.length > 0;
 
     if (found) {
-      const userId = data.data[0]?.id;
-      if (!userId) return { platform: "roblox", status: "unknown" };
-
+      const userId = data.data[0].id;
       return {
         platform: "roblox",
         status: "taken",
