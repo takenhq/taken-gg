@@ -260,33 +260,183 @@ async function checkInstagram(username) {
 /* -------------------------
    Roblox — best approach (your method)
    ------------------------- */
-async function checkRoblox(username) {
+// ---------- Roblox (hardened) ----------
+
+// Roblox username format constraints (public-facing practical constraints)
+function isValidRobloxUsername(username) {
+  return /^[A-Za-z0-9_]{3,20}$/.test(username);
+}
+
+async function fetchWithTimeout(url, options = {}, timeoutMs = 4000) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort("timeout"), timeoutMs);
   try {
-    const res = await smartFetch("https://users.roblox.com/v1/usernames/users", {
+    return await fetch(url, { ...options, signal: ctrl.signal });
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+async function safeJson(res) {
+  try {
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+// Primary check: users.roblox.com username lookup
+async function robloxLookupByUsername(username) {
+  const endpoint = "https://users.roblox.com/v1/usernames/users";
+  const body = JSON.stringify({
+    usernames: [username],
+    excludeBannedUsers: false
+  });
+
+  const res = await fetchWithTimeout(
+    endpoint,
+    {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({ usernames: [username], excludeBannedUsers: false }),
-      timeoutMs: 7000,
-    });
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "User-Agent": "taken.gg/1.0 (+https://taken.gg)"
+      },
+      body
+    },
+    4500
+  );
 
-    if (!res.ok) {
-      if (res.status === 429 || res.status === 403) return { platform: "roblox", status: "unknown" };
-      return { platform: "roblox", status: "unknown" };
-    }
+  // hard-fail statuses that are usually transient/bot/rate issues
+  if ([429, 500, 502, 503, 504].includes(res.status)) {
+    return { transient: true, data: null };
+  }
 
-    const data = await res.json().catch(() => null);
-    const found = Array.isArray(data?.data) && data.data.length > 0;
+  if (!res.ok) {
+    return { transient: false, data: null };
+  }
 
-    if (found) {
-      const userId = data.data[0].id;
-      return {
+  const json = await safeJson(res);
+  if (!json || !Array.isArray(json.data)) {
+    return { transient: true, data: null };
+  }
+
+  // If exact username exists in returned data => taken
+  const match = json.data.find(
+    (u) => u && typeof u.name === "string" && u.name.toLowerCase() === username.toLowerCase()
+  );
+
+  if (match && match.id) {
+    return {
+      transient: false,
+      data: {
         platform: "roblox",
         status: "taken",
-        url: `https://www.roblox.com/users/${userId}/profile`,
+        userId: match.id,
+        url: `https://www.roblox.com/users/${match.id}/profile`
+      }
+    };
+  }
+
+  // No exact match means available for this endpoint semantics
+  return {
+    transient: false,
+    data: { platform: "roblox", status: "available" }
+  };
+}
+
+// Secondary fallback: legacy users/get-by-username (still useful as fallback in practice)
+async function robloxFallbackGetByUsername(username) {
+  const url = `https://api.roblox.com/users/get-by-username?username=${encodeURIComponent(username)}`;
+  const res = await fetchWithTimeout(
+    url,
+    {
+      method: "GET",
+      headers: {
+        "Accept": "application/json",
+        "User-Agent": "taken.gg/1.0 (+https://taken.gg)"
+      }
+    },
+    4000
+  );
+
+  if ([429, 500, 502, 503, 504].includes(res.status)) {
+    return { transient: true, data: null };
+  }
+
+  if (!res.ok) {
+    return { transient: false, data: null };
+  }
+
+  const json = await safeJson(res);
+  if (!json || typeof json !== "object") {
+    return { transient: true, data: null };
+  }
+
+  // Typical shape when found: { Id: 123, Username: "Name", ... }
+  // Typical not-found often includes Success=false / Id=0 / error message
+  const id = json.Id || json.id || 0;
+  const found = Number(id) > 0;
+
+  if (found) {
+    return {
+      transient: false,
+      data: {
+        platform: "roblox",
+        status: "taken",
+        userId: Number(id),
+        url: `https://www.roblox.com/users/${Number(id)}/profile`
+      }
+    };
+  }
+
+  return {
+    transient: false,
+    data: { platform: "roblox", status: "available" }
+  };
+}
+
+async function checkRoblox(username) {
+  try {
+    const clean = String(username || "").trim();
+
+    // deterministic invalid handling (not "unknown")
+    if (!isValidRobloxUsername(clean)) {
+      return {
+        platform: "roblox",
+        status: "invalid",
+        reason: "Username must be 3–20 chars and only letters, numbers, underscores."
       };
     }
 
-    return { platform: "roblox", status: "available" };
+    // 1) Primary
+    let first = await robloxLookupByUsername(clean);
+    if (first.data) return first.data;
+
+    // 2) Retry once if transient
+    if (first.transient) {
+      await sleep(180);
+      const retry = await robloxLookupByUsername(clean);
+      if (retry.data) return retry.data;
+    }
+
+    // 3) Fallback endpoint
+    let fb = await robloxFallbackGetByUsername(clean);
+    if (fb.data) return fb.data;
+
+    // 4) Fallback retry once if transient
+    if (fb.transient) {
+      await sleep(160);
+      const fbRetry = await robloxFallbackGetByUsername(clean);
+      if (fbRetry.data) return fbRetry.data;
+    }
+
+    // only truly unknown after exhausting both paths
+    return { platform: "roblox", status: "unknown" };
   } catch {
     return { platform: "roblox", status: "unknown" };
   }
