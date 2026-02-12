@@ -101,6 +101,11 @@ nav .inner{display:flex;height:3.5rem;align-items:center;justify-content:space-b
 .badge.available{background:hsla(142,70%,45%,0.1);color:var(--green);border-color:hsla(142,70%,45%,0.3)}
 .badge.taken{background:hsla(0,80%,55%,0.1);color:var(--red);border-color:hsla(0,80%,55%,0.3)}
 .badge.unknown{background:hsla(45,90%,55%,0.1);color:var(--yellow);border-color:hsla(45,90%,55%,0.3)}
+.badge.invalid{
+  background: hsla(35,90%,55%,0.12);
+  color: hsl(35,90%,60%);
+  border-color: hsla(35,90%,55%,0.35);
+}
 .card-time{font-size:10px;color:rgba(255,255,255,0.3)}
 .card-actions{margin-top:0.75rem;display:flex;gap:0.5rem;font-size:0.75rem}
 .card-actions a{color:var(--muted);transition:color 0.15s}
@@ -486,8 +491,15 @@ async function handleCheck(){
 function renderResults(results,username){
   const html=results.map((r,i)=>{
     const p=PLATFORMS.find(x=>x.id===r.platform);
-    const statusLabel={available:"Available",taken:"Taken",unknown:"Unknown"}[r.status] || "Unknown";
-    const badgeClass=r.status || "unknown";
+const statusLabel = {
+  available: "Available",
+  taken: "Taken",
+  unknown: "Unknown",
+  invalid: "Invalid"
+}[r.status] || "Unknown";
+
+const badgeClass = ["available","taken","unknown","invalid"].includes(r.status) ? r.status : "unknown";
+
 
     let actions="";
     if(r.status==="taken" && r.url) actions += `<a href="${r.url}" target="_blank" rel="noopener noreferrer">View profile →</a>`;
